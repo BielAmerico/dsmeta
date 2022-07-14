@@ -1,5 +1,7 @@
 package com.devsuperior.dsmeta.service;
 
+import java.text.DecimalFormat;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -42,7 +44,7 @@ public class SmsService {
 		/* Mensagem que irá como notificação para o número */
 		
 		String msg = "O vendedor " + sale.getSellerName() + " foi destaque em " + date
-			    + " com um total de R$ " + String.format("%.0f", sale.getAmount());
+			    + " com um total de R$ " + new DecimalFormat("#,##0.00").format(sale.getAmount());
 		
 		Twilio.init(twilioSid, twilioKey);
 
