@@ -41,9 +41,8 @@ public class SmsService {
  	
 		/* Mensagem que irá como notificação para o número */
 		
-		String smg = " O Vendedor" + sale.getSellerName() + " foi destaque em " + date
-				+ "com um total de R$ " + String.format("%.2f", sale.getAmount());
-											/*forma de formatar um número com duas casas decimais no java*/
+		String msg = "O vendedor " + sale.getSellerName() + " foi destaque em " + date
+			    + " com um total de R$ " + String.format("%.0f", sale.getAmount());
 		
 		Twilio.init(twilioSid, twilioKey);
 
@@ -51,7 +50,7 @@ public class SmsService {
 		PhoneNumber from = new PhoneNumber(twilioPhoneFrom);
 
 	
-		Message message = Message.creator(to, from, smg).create();
+		Message message = Message.creator(to, from, msg).create();
 
 		System.out.println(message.getSid());
 	}
