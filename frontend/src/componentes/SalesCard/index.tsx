@@ -21,11 +21,23 @@ function SalesCard() {
     const [sales, setSales] = useState<Sale[]>([]);
 
     useEffect(() => {
-        axios.get(`${BASE_URL}/sales`)
+
+        /* função para recortar um texto no JS* (slice com posiçãoes (x.x))*/
+        const dmin = minDate.toISOString().slice(0, 10);
+        const dmax = maxDate.toISOString().slice(0, 10);
+
+        console.log(dmin);
+        
+        /* chamando a minha requisição passando de argumento
+         os valores de data que tiver nas caixinhas dmin e dmax*/
+        axios.get(`${BASE_URL}/sales?minDate=${dmin}&maxDate=${dmax}`)
             .then(response => {
                 setSales(response.data.content);
             });
-    }, []);
+        
+            /* configurando o meu useEffect para sempre rodar novamente quando 
+        os daddos mudarem no caso(date min and date max) */
+    }, [minDate, maxDate]);
 
     return (
         <div className="dsmeta-card">
