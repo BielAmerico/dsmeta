@@ -28,15 +28,13 @@ public class SaleController {
 	public Page<Sale> findSales(
 			@RequestParam(value="minDate", defaultValue="") String minDate, 
 			@RequestParam(value="maxDate", defaultValue="") String maxDate, 
-			Pageable pageable){
+			Pageable pageable) {
+		
 		return service.findSales(minDate, maxDate, pageable);
-	
 	}
 	
-	/* usei /notification para diferenciar um getmapping do outro */
 	@GetMapping("/{id}/notification")
 	public void notifySms(@PathVariable Long id) {
 		smsService.sendSms(id);
-
 	}
 }
