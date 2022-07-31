@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.devsuperior.dsmeta.entities.Sale;
+import com.devsuperior.dsmeta.exceptions.SmsException;
 import com.devsuperior.dsmeta.repositories.SaleRepository;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
@@ -30,19 +31,25 @@ public class SmsService {
 	
 	public void sendSms(Long saleId) {
 		
-		Sale sale = saleRepository.findById(saleId).get();
+		try {
+			
+			Sale sale = this.saleRepository.findById(saleId).get();
+			
+			Twilio.init(this.twilioSid, this.twilioKey);
+
+			PhoneNumber to = new PhoneNumber(this.twilioPhoneTo);
+			PhoneNumber from = new PhoneNumber(this.twilioPhoneFrom);
+
+			String msgToSend = this.generateMessageToSend(sale);
 		
-		Twilio.init(twilioSid, twilioKey);
+			Message message = Message.creator(to, from, msgToSend).create();
 
-		PhoneNumber to = new PhoneNumber(twilioPhoneTo);
-		PhoneNumber from = new PhoneNumber(twilioPhoneFrom);
-
-		String msgToSend = this.generateMessageToSend(sale);
-	
-		Message message = Message.creator(to, from, msgToSend).create();
-
-		// TODO - Adicionar LOG
-		System.out.println(message.getSid());
+			// TODO - Adicionar LOG
+			System.out.println(message.getSid());
+			
+		} catch (Exception exception) {
+			throw new SmsException("Erro ao enviar sms para o vendedor!");
+		}
 	}
 	
 	private String generateMessageToSend(Sale sale) {

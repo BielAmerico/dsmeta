@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.devsuperior.dsmeta.entities.Sale;
+import com.devsuperior.dsmeta.exceptions.SalesNotFoundException;
 import com.devsuperior.dsmeta.repositories.SaleRepository;
 import com.devsuperior.dsmeta.utils.DateUtils;
 
@@ -23,7 +24,13 @@ public class SaleServices {
 		LocalDate min = minDate.equals("") ? today.minusDays(365) :LocalDate.parse(minDate);
 		LocalDate max = maxDate.equals("") ? today : LocalDate.parse(maxDate);
 		
-		return repository.findSales(min, max, pageable);
+		try {
+			
+			return this.repository.findSales(min, max, pageable);
+			
+		} catch (Exception exception) {
+			throw new SalesNotFoundException("Vendor não encontrado");
+		}
 	}
 }
 
