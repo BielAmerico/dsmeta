@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.devsuperior.dsmeta.entities.Sale;
+import com.devsuperior.dsmeta.exceptions.SmsException;
 import com.devsuperior.dsmeta.repositories.SaleRepository;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
@@ -13,9 +14,6 @@ import com.twilio.type.PhoneNumber;
 @Service
 public class SmsService {
 
-	/* Parâmetro onde o valor do "twilio.sid" será atribuído para o "String twilioSid". Dessa forma
-	 * eu escondo informações frágeis */
-	 
 	@Value("${twilio.sid}")
 	private String twilioSid;
 
@@ -33,25 +31,32 @@ public class SmsService {
 	
 	public void sendSms(Long saleId) {
 		
-		/* função para trazer o id */
-		Sale sale = saleRepository.findById(saleId).get();
-		
-		/* Está função irá receber a minha data / mês e / ano*/
-		String date = sale.getDate().getMonthValue() + "/" + sale.getDate().getYear();
- 	
-		/* Mensagem que irá como notificação para o número */
-		
-		String msg = "O vendedor " + sale.getSellerName() + " foi destaque em " + date
-			    + " com um total de R$ " + String.format("%.0f", sale.getAmount());
-		
-		Twilio.init(twilioSid, twilioKey);
+		try {
+			
+			Sale sale = this.saleRepository.findById(saleId).get();
+			
+			Twilio.init(this.twilioSid, this.twilioKey);
 
-		PhoneNumber to = new PhoneNumber(twilioPhoneTo);
-		PhoneNumber from = new PhoneNumber(twilioPhoneFrom);
+			PhoneNumber to = new PhoneNumber(this.twilioPhoneTo);
+			PhoneNumber from = new PhoneNumber(this.twilioPhoneFrom);
 
+			String msgToSend = this.generateMessageToSend(sale);
+		
+			Message message = Message.creator(to, from, msgToSend).create();
+
+			// TODO - Adicionar LOG
+			System.out.println(message.getSid());
+			
+		} catch (Exception exception) {
+			throw new SmsException("Erro ao enviar sms para o vendedor!");
+		}
+	}
 	
-		Message message = Message.creator(to, from, msg).create();
-
-		System.out.println(message.getSid());
+	private String generateMessageToSend(Sale sale) {
+		
+		String date = sale.getDate().getMonthValue() + "/" + sale.getDate().getYear();
+		String msg = String.format("O vendedor %s foi desta em %s com um total de R$ %.0f.", 
+									sale.getSellerName(), date, sale.getAmount());
+		return msg;
 	}
 }
